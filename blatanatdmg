@@ -1,0 +1,157 @@
+--[[  Keybinds  ]]--
+
+_G.Toggle = "p"
+_G.Increase = "j"
+_G.Decrease = "k"
+_G.Visualizer = "t"
+_G.Counter = "m"
+
+--[[  Reach Settings  ]]--
+
+_G.reachDistance = 3 -- This is the default amount of reach you will have once you execute the script.
+_G.reachEnabled = true -- Whether or not the reach is enabled when you execute the script.
+
+--[[  Visualizer Settings  ]]--
+_G.visualizerEnabled = false -- Whether or not a visualizer will be shown.
+_G.lineColor3 = Color3.fromRGB(29,29,29)
+_G.lineTransparency = 0.3
+_G.surfaceColor3 = Color3.fromRGB(29,29,29)
+_G.surfaceTransparency = 0.6
+
+local hiddenPart = Instance.new("Part")
+hiddenPart.Transparency = 1
+hiddenPart.Anchored = true
+hiddenPart.CanCollide = false
+hiddenPart.Size = Vector3.new(0.1,0.1,0.1)
+local visualizerBox = Instance.new("SelectionSphere")
+visualizerBox.Adornee = hiddenPart
+visualizerBox.Parent = nil
+
+local r = Instance.new("ScreenGui")
+local c = Instance.new("TextBox")
+
+r.Name = "r"
+r.Parent = game.CoreGui
+r.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+r.IgnoreGuiInset = true
+
+c.Name = "c"
+c.Parent = r
+c.BackgroundColor3 = Color3.fromRGB(253, 255, 110)
+c.BackgroundTransparency = 1.000
+c.BorderSizePixel = 0
+c.Position = UDim2.new(0.487, 0,0, 0)
+c.Size = UDim2.new(0.0250163078, 0, 0.0402065441, 0)
+c.Font = Enum.Font.SourceSans
+c.Text = "3"
+c.TextColor3 = Color3.fromRGB(196, 255, 0)
+c.TextScaled = true
+c.TextSize = 14.000
+c.TextWrapped = true
+c.Visible = false
+
+_G.AC = false
+_G.scriptActive = true -- Don't change this unless you wanna break the script, this essentially allows us to de-activate the script mid-game.
+
+
+game:GetService("RunService").Stepped:Connect(function()
+	if _G.scriptActive then
+		Player = game.Players.LocalPlayer
+		if _G.AC then
+			mouse1click()
+			mouse1click()
+		end
+		if not _G.visualizerEnabled and visualizerBox.Parent ~= nil then
+			visualizerBox.Parent = nil
+		end
+		if _G.visualizerEnabled and _G.reachEnabled then
+			pcall(function()
+				if Player.Character.Health ~= 0 and not Player.Backpack:FindFirstChildOfClass("Tool") and Player.Character:FindFirstChildOfClass("Tool") then
+					Sword = Player.Character:FindFirstChildOfClass("Tool")
+					visualizerBox.Parent = Player.Character
+					visualizerBox.Color3 = _G.lineColor3
+					visualizerBox.Transparency = _G.lineTransparency
+					visualizerBox.SurfaceColor3 = _G.surfaceColor3
+					visualizerBox.SurfaceTransparency = _G.surfaceTransparency
+
+					hiddenPart.Size = Vector3.new(_G.reachDistance,_G.reachDistance,_G.reachDistance)
+					hiddenPart.Position = Sword.Handle.Position
+				else
+					visualizerBox.Parent = nil
+				end
+			end)
+		end
+		if _G.reachEnabled then
+			pcall(function()
+				Sword = Player.Character:FindFirstChildOfClass("Tool").Handle
+				for _,v in pairs(game.Players:GetPlayers()) do
+					if v and v ~= game.Players.LocalPlayer and v.Character.Humanoid.Health ~= 0 then
+						if (Sword.Position - v.Character.Torso.Position).Magnitude <= _G.reachDistance then 
+							for i = 1,2 do
+								firetouchinterest(Sword, v.Character["Torso"], 0)
+								firetouchinterest(Sword, v.Character["Torso"], 1)
+								firetouchinterest(Sword, v.Character["Left Arm"], 0)
+								firetouchinterest(Sword, v.Character["Left Arm"], 1)
+								firetouchinterest(Sword, v.Character["Right Arm"], 0)
+								firetouchinterest(Sword, v.Character["Right Arm"], 1)
+								firetouchinterest(Sword, v.Character["Head"], 0)
+								firetouchinterest(Sword, v.Character["Head"], 1)
+							end
+						end
+					end
+				end
+			end)
+		end
+	else
+		visualizerBox.Parent = nil
+	end
+end)
+
+local Mouse = game.Players.LocalPlayer:GetMouse()
+
+Mouse.KeyDown:Connect(function(key)
+	Player = game.Players.LocalPlayer
+
+	if key == _G.Toggle then
+		if _G.reachEnabled then
+			_G.reachEnabled = false
+		else
+			_G.reachEnabled = true
+		end
+	end
+
+	if key == _G.ACToggle then
+		if _G.AC then
+			_G.AC = false
+		else
+			_G.AC = true
+		end
+	end
+	
+	if key == _G.Counter then
+		if c.Visible then
+			c.Visible = false
+		else
+			c.Visible = true
+		end
+	end
+	
+	if key == _G.Increase then
+		_G.reachDistance = _G.reachDistance + .5
+		c.Text = tostring(_G.reachDistance)
+	end
+
+	if key == _G.Decrease then
+		_G.reachDistance = _G.reachDistance - .5
+		c.Text = tostring(_G.reachDistance)
+	end
+
+	if key == _G.Visualizer then
+		if _G.visualizerEnabled then
+			_G.visualizerEnabled = false
+		else
+			_G.visualizerEnabled = true
+		end
+	end
+
+end)
